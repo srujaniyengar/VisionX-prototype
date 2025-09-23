@@ -3,14 +3,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Stepper, { Step } from './ui/Stepper';
 import SplitText from './ui/SplitText';
 
-const OnboardingModal = memo(({ onComplete }: { onComplete: () => void }) => {
+interface OnboardingModalProps {
+  onComplete: () => void;
+}
+
+const OnboardingModal = memo(({ onComplete }: OnboardingModalProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState('');
+  const [dontShowAgain, setDontShowAgain] = useState(false);
 
   useEffect(() => {
-    // Check if user has completed onboarding before
-    const hasCompletedOnboarding = localStorage.getItem('chola-citadel-onboarding');
-    if (!hasCompletedOnboarding) {
+    const dontShow = localStorage.getItem('dontShowTutorial');
+    if (!dontShow) {
       setIsOpen(true);
     } else {
       onComplete();
@@ -18,10 +22,12 @@ const OnboardingModal = memo(({ onComplete }: { onComplete: () => void }) => {
   }, [onComplete]);
 
   const handleComplete = useCallback(() => {
-    localStorage.setItem('chola-citadel-onboarding', 'completed');
+    if (dontShowAgain) {
+      localStorage.setItem('dontShowTutorial', 'true');
+    }
     setIsOpen(false);
     onComplete();
-  }, [onComplete]);
+  }, [dontShowAgain, onComplete]);
 
   const handleAnimationComplete = useCallback(() => {
     console.log('All letters have animated!');
@@ -37,12 +43,10 @@ const OnboardingModal = memo(({ onComplete }: { onComplete: () => void }) => {
           className="fixed inset-0 z-50 flex items-center justify-center bg-dark-bg/95 backdrop-blur-md"
           data-testid="onboarding-modal"
         >
-          <div className="w-full max-w-2xl mx-4">
+          <div className="w-full max-w-2xl mx-4 relative">
             <Stepper
               initialStep={1}
-              onStepChange={(step) => {
-                console.log('Current step:', step);
-              }}
+              onStepChange={(step) => console.log('Current step:', step)}
               onFinalStepCompleted={handleComplete}
               backButtonText="Previous"
               nextButtonText="Next"
@@ -73,7 +77,7 @@ const OnboardingModal = memo(({ onComplete }: { onComplete: () => void }) => {
                   </p>
                 </div>
               </Step>
-              
+
               <Step>
                 <div className="text-center py-8">
                   <div className="w-32 h-32 mx-auto mb-6 bg-ocean-blue/20 rounded-full flex items-center justify-center border border-ocean-blue/30">
@@ -94,7 +98,7 @@ const OnboardingModal = memo(({ onComplete }: { onComplete: () => void }) => {
                   </p>
                 </div>
               </Step>
-              
+
               <Step>
                 <div className="text-center py-8">
                   <div className="w-32 h-32 mx-auto mb-6 bg-destructive/20 rounded-full flex items-center justify-center border border-destructive/30">
@@ -112,17 +116,17 @@ const OnboardingModal = memo(({ onComplete }: { onComplete: () => void }) => {
                   </p>
                   <div className="bg-muted/20 rounded-lg p-4 text-left">
                     <h4 className="font-semibold text-foreground mb-2">What's your name?</h4>
-                    <input 
-                      value={name} 
-                      onChange={(e) => setName(e.target.value)} 
-                      placeholder="Enter your name" 
+                    <input
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Enter your name"
                       className="w-full px-4 py-2 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                       data-testid="input-name"
                     />
                   </div>
                 </div>
               </Step>
-              
+
               <Step>
                 <div className="text-center py-8">
                   <div className="w-32 h-32 mx-auto mb-6 bg-primary/20 rounded-full flex items-center justify-center border border-primary/30">
@@ -138,9 +142,20 @@ const OnboardingModal = memo(({ onComplete }: { onComplete: () => void }) => {
                   <p className="text-foreground mb-4">
                     You're now ready to join the mission of protecting our marine ecosystems.
                   </p>
-                  <p className="text-muted-foreground">
+                  <p className="text-muted-foreground mb-4">
                     Click "Complete" to start exploring The Chola Citadel and make your first impact.
                   </p>
+
+                  {/* Integrated "Don't show again" checkbox */}
+                  <label className="flex items-center justify-center gap-2 mt-4 cursor-pointer text-sm text-muted-foreground hover:text-foreground">
+                    <input
+                      type="checkbox"
+                      checked={dontShowAgain}
+                      onChange={(e) => setDontShowAgain(e.target.checked)}
+                      className="w-4 h-4 accent-primary"
+                    />
+                    Don't show this again
+                  </label>
                 </div>
               </Step>
             </Stepper>
