@@ -1,0 +1,577 @@
+The Chola Citadel: Detailed Frontend Generation Prompt (v2)
+
+Objective: Create a complete React + Vite frontend MVP for "The Chola Citadel," a sophisticated ocean hazard and natural crisis reporting platform. The application must feature a premium, dark, aquatic-themed UI and be fully responsive. All backend functionality must be mocked with dummy data.
+1. Core Theme & Aesthetics
+
+    Theme: Dark and aquatic. Use a color palette inspired by deep ocean colors.
+
+    Background: The primary background for the application, especially the homepage, must be the custom Silk component provided below. Use theme-appropriate colors like oceanBlue or deepTeal.
+
+    Animations: The UI must feel alive with the specified SplitText and VariableProximity animations.
+
+2. Core Technical Requirements
+
+    Framework: React 18+ with Vite.
+
+    Routing: React Router for page navigation.
+
+    Styling: Tailwind CSS.
+
+    API Layer: Axios, with all calls intercepted and mocked to return dummy data.
+
+3. Project Structure
+
+Generate the following file and directory structure:
+
+src/
+├── assets/
+├── components/
+│   ├── layout/
+│   │   └── CardNav.jsx
+│   ├── ui/
+│   │   ├── SplitText.jsx
+│   │   └── VariableProximity.jsx
+│   └── background/
+│       └── Silk.jsx
+├── mocks/
+│   └── reports.js
+├── pages/
+│   ├── HomePage.jsx
+│   ├── MapPage.jsx
+│   ├── ReportPage.jsx
+│   └── TutorialPage.jsx
+├── services/
+│   └── apiClient.js
+├── styles/
+│   ├── global.css
+│   ├── CardNav.css
+│   └── VariableProximity.css
+├── App.jsx
+└── main.jsx
+
+4. Custom Component Implementation
+
+Create the following component and CSS files using the exact source code provided below. Do not use external installation commands like shadcn add.
+4.1 Silk Background Component
+
+    File Path: src/components/background/Silk.jsx
+
+    Code:
+
+    /* eslint-disable react/no-unknown-property */
+    import { Canvas, useFrame, useThree } from '@react-three/fiber';
+    import { forwardRef, useRef, useMemo, useLayoutEffect } from 'react';
+    import { Color } from 'three';
+
+    const hexToNormalizedRGB = hex => {
+      hex = hex.replace('#', '');
+      return [
+        parseInt(hex.slice(0, 2), 16) / 255,
+        parseInt(hex.slice(2, 4), 16) / 255,
+        parseInt(hex.slice(4, 6), 16) / 255
+      ];
+    };
+
+    const vertexShader = `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }`;
+
+    const fragmentShader = `
+    varying vec2 vUv;
+    uniform float uTime;
+    uniform vec3  uColor;
+    uniform float uSpeed;
+    uniform float uScale;
+    uniform float uRotation;
+    uniform float uNoiseIntensity;
+    const float e = 2.718281828459045;
+    float noise(vec2 texCoord) {
+      float G = e;
+      vec2  r = (G * sin(G * texCoord));
+      return fract(r.x * r.y * (1.0 + texCoord.x));
+    }
+    vec2 rotateUvs(vec2 uv, float angle) {
+      float c = cos(angle);
+      float s = sin(angle);
+      mat2  rot = mat2(c, -s, s, c);
+      return rot * uv;
+    }
+    void main() {
+      float rnd = noise(gl_FragCoord.xy);
+      vec2 uv = rotateUvs(vUv * uScale, uRotation);
+      vec2 tex = uv * uScale;
+      float tOffset = uSpeed * uTime;
+      tex.y += 0.03 * sin(8.0 * tex.x - tOffset);
+      float pattern = 0.6 + 0.4 * sin(5.0 * (tex.x + tex.y + cos(3.0 * tex.x + 5.0 * tex.y) + 0.02 * tOffset) + sin(20.0 * (tex.x + tex.y - 0.1 * tOffset)));
+      vec4 col = vec4(uColor, 1.0) * vec4(pattern) - rnd / 15.0 * uNoiseIntensity;
+      col.a = 1.0;
+      gl_FragColor = col;
+    }`;
+
+    const SilkPlane = forwardRef(function SilkPlane({ uniforms }, ref) {
+      const { viewport } = useThree();
+      useLayoutEffect(() => {
+        if (ref.current) {
+          ref.current.scale.set(viewport.width, viewport.height, 1);
+        }
+      }, [ref, viewport]);
+      useFrame((_, delta) => {
+        ref.current.material.uniforms.uTime.value += 0.1 * delta;
+      });
+      return (
+        <mesh ref={ref}>
+          <planeGeometry args={[1, 1, 1, 1]} />
+          <shaderMaterial uniforms={uniforms} vertexShader={vertexShader} fragmentShader={fragmentShader} />
+        </mesh>
+      );
+    });
+    SilkPlane.displayName = 'SilkPlane';
+
+    const Silk = ({ speed = 5, scale = 1, color = '#7B7481', noiseIntensity = 1.5, rotation = 0 }) => {
+      const meshRef = useRef();
+      const uniforms = useMemo(
+        () => ({
+          uSpeed: { value: speed },
+          uScale: { value: scale },
+          uNoiseIntensity: { value: noiseIntensity },
+          uColor: { value: new Color(...hexToNormalizedRGB(color)) },
+          uRotation: { value: rotation },
+          uTime: { value: 0 }
+        }),
+        [speed, scale, noiseIntensity, color, rotation]
+      );
+      return (
+        <Canvas dpr={[1, 2]} frameloop="always">
+          <SilkPlane ref={meshRef} uniforms={uniforms} />
+        </Canvas>
+      );
+    };
+    export default Silk;
+
+4.2 CardNav Component
+
+    File Path: src/components/layout/CardNav.jsx
+
+    Code:
+
+    import { useLayoutEffect, useRef, useState } from 'react';
+    import { gsap } from 'gsap';
+    import { GoArrowUpRight } from 'react-icons/go';
+    import '../../styles/CardNav.css';
+    import { Link } from 'react-router-dom';
+
+    const CardNav = ({ logo, logoAlt = 'Logo', items, className = '', ease = 'power3.out', baseColor = '#fff', menuColor, buttonBgColor, buttonTextColor }) => {
+        const [isHamburgerOpen, setIsHamburgerOpen] = useState(false);
+        const [isExpanded, setIsExpanded] = useState(false);
+        const navRef = useRef(null);
+        const cardsRef = useRef([]);
+        const tlRef = useRef(null);
+
+        const calculateHeight = () => {
+            const navEl = navRef.current;
+            if (!navEl) return 260;
+            const isMobile = window.matchMedia('(max-width: 768px)').matches;
+            if (isMobile) {
+                const contentEl = navEl.querySelector('.card-nav-content');
+                if (contentEl) {
+                    const wasVisible = contentEl.style.visibility;
+                    contentEl.style.visibility = 'visible';
+                    const topBar = 60;
+                    const padding = 16;
+                    const contentHeight = contentEl.scrollHeight;
+                    contentEl.style.visibility = wasVisible;
+                    return topBar + contentHeight + padding;
+                }
+            }
+            return 260;
+        };
+
+        const createTimeline = () => {
+            const navEl = navRef.current;
+            if (!navEl) return null;
+            gsap.set(navEl, { height: 60, overflow: 'hidden' });
+            gsap.set(cardsRef.current, { y: 50, opacity: 0 });
+            const tl = gsap.timeline({ paused: true });
+            tl.to(navEl, { height: calculateHeight, duration: 0.4, ease });
+            tl.to(cardsRef.current, { y: 0, opacity: 1, duration: 0.4, ease, stagger: 0.08 }, '-=0.1');
+            return tl;
+        };
+
+        useLayoutEffect(() => {
+            const tl = createTimeline();
+            tlRef.current = tl;
+            return () => tl?.kill();
+        }, [ease, items]);
+
+        const toggleMenu = () => {
+            const tl = tlRef.current;
+            if (!tl) return;
+            if (!isExpanded) {
+                setIsHamburgerOpen(true);
+                setIsExpanded(true);
+                tl.play(0);
+            } else {
+                setIsHamburgerOpen(false);
+                tl.eventCallback('onReverseComplete', () => setIsExpanded(false));
+                tl.reverse();
+            }
+        };
+
+        return (
+            <div className={`card-nav-container ${className}`}>
+                <nav ref={navRef} className={`card-nav ${isExpanded ? 'open' : ''}`} style={{ backgroundColor: baseColor }}>
+                    <div className="card-nav-top">
+                        <div className={`hamburger-menu ${isHamburgerOpen ? 'open' : ''}`} onClick={toggleMenu} role="button" aria-label={isExpanded ? 'Close menu' : 'Open menu'} tabIndex={0} style={{ color: menuColor || '#000' }}>
+                            <div className="hamburger-line" />
+                            <div className="hamburger-line" />
+                        </div>
+                        <div className="logo-container">
+                            <Link to="/"><img src={logo} alt={logoAlt} className="logo" /></Link>
+                        </div>
+                        <Link to="/report" className="card-nav-cta-button" style={{ backgroundColor: buttonBgColor, color: buttonTextColor, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            Get Started
+                        </Link>
+                    </div>
+                    <div className="card-nav-content" aria-hidden={!isExpanded}>
+                        {(items || []).slice(0, 3).map((item, idx) => (
+                            <div key={`${item.label}-${idx}`} className="nav-card" ref={el => cardsRef.current[idx] = el} style={{ backgroundColor: item.bgColor, color: item.textColor }}>
+                                <div className="nav-card-label">{item.label}</div>
+                                <div className="nav-card-links">
+                                    {item.links?.map((lnk, i) => (
+                                        <Link key={`${lnk.label}-${i}`} className="nav-card-link" to={lnk.href} aria-label={lnk.ariaLabel}>
+                                            <GoArrowUpRight className="nav-card-link-icon" aria-hidden="true" />
+                                            {lnk.label}
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </nav>
+            </div>
+        );
+    };
+    export default CardNav;
+
+    CSS File Path: src/styles/CardNav.css
+
+    CSS Code:
+
+    .card-nav-container{position:absolute;top:2em;left:50%;transform:translateX(-50%);width:90%;max-width:800px;z-index:99;box-sizing:border-box}.card-nav{display:block;height:60px;padding:0;background-color:#fff;border:.5px solid rgba(255,255,255,.1);border-radius:.75rem;box-shadow:0 4px 6px rgba(0,0,0,.1);position:relative;overflow:hidden;will-change:height}.card-nav-top{position:absolute;top:0;left:0;right:0;height:60px;display:flex;align-items:center;justify-content:space-between;padding:.5rem .45rem .55rem 1.1rem;z-index:2}.hamburger-menu{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:6px}.hamburger-menu:hover .hamburger-line{opacity:.75}.hamburger-line{width:30px;height:2px;background-color:currentColor;transition:transform .25s ease,opacity .2s ease,margin .3s ease;transform-origin:50% 50%}.hamburger-menu.open .hamburger-line:first-child{transform:translateY(4px) rotate(45deg)}.hamburger-menu.open .hamburger-line:last-child{transform:translateY(-4px) rotate(-45deg)}.logo-container{display:flex;align-items:center;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}.logo{height:28px}.card-nav-cta-button{background-color:#111;color:#fff;border:none;border-radius:calc(.75rem - .35rem);padding:0 1rem;height:100%;font-weight:500;cursor:pointer;transition:background-color .3s ease}.card-nav-cta-button:hover{background-color:#333}.card-nav-content{position:absolute;left:0;right:0;top:60px;bottom:0;padding:.5rem;display:flex;align-items:flex-end;gap:12px;visibility:hidden;pointer-events:none;z-index:1}.card-nav.open .card-nav-content{visibility:visible;pointer-events:auto}.nav-card{height:100%;flex:1 1 0;min-width:0;border-radius:calc(.75rem - .2rem);position:relative;display:flex;flex-direction:column;padding:12px 16px;gap:8px;user-select:none}.nav-card-label{font-weight:400;font-size:22px;letter-spacing:-.5px}.nav-card-links{margin-top:auto;display:flex;flex-direction:column;gap:2px}.nav-card-link{font-size:16px;cursor:pointer;text-decoration:none;color:inherit;transition:opacity .3s ease;display:inline-flex;align-items:center;gap:6px}.nav-card-link:hover{opacity:.75}@media (max-width: 768px){.card-nav-container{width:90%;top:1.2em}.card-nav-top{padding:.5rem 1rem;justify-content:space-between}.hamburger-menu{order:2}.logo-container{position:static;transform:none;order:1}.card-nav-cta-button{display:none}.card-nav-content{flex-direction:column;align-items:stretch;gap:8px;padding:.5rem;bottom:0;justify-content:flex-start}.nav-card{height:auto;min-height:60px;flex:1 1 auto;max-height:none}.nav-card-label{font-size:18px}.nav-card-link{font-size:15px}}
+
+4.3 SplitText Component
+
+    File Path: src/components/ui/SplitText.jsx
+
+    Code:
+
+    import { useRef } from 'react';
+    import { gsap } from 'gsap';
+    import { ScrollTrigger } from 'gsap/ScrollTrigger';
+    import { SplitText as GSAPSplitText } from 'gsap/SplitText';
+    import { useGSAP } from '@gsap/react';
+
+    gsap.registerPlugin(ScrollTrigger, GSAPSplitText);
+
+    const SplitText = ({ text, className = '', delay = 100, duration = 0.8, ease = 'power3.out', splitType = 'chars', from = { opacity: 0, y: 50 }, to = { opacity: 1, y: 0 }, tag: Tag = 'h1' }) => {
+        const ref = useRef(null);
+
+        useGSAP(() => {
+            if (!ref.current || !text) return;
+            let split = new GSAPSplitText(ref.current, { type: splitType, linesClass: "split-line" });
+            let targets = split.chars;
+            if (splitType.includes('words')) targets = split.words;
+            if (splitType.includes('lines')) targets = split.lines;
+
+            gsap.fromTo(targets, from, {
+                ...to,
+                duration,
+                ease,
+                stagger: delay / 1000,
+                scrollTrigger: {
+                    trigger: ref.current,
+                    start: 'top 85%',
+                    toggleActions: 'play none none none',
+                    once: true,
+                },
+            });
+            return () => split.revert();
+        }, { dependencies: [text, splitType, duration, delay, ease, JSON.stringify(from), JSON.stringify(to)], scope: ref });
+
+        return <Tag ref={ref} className={className} style={{ overflow: 'hidden' }}>{text}</Tag>;
+    };
+    export default SplitText;
+
+4.4 VariableProximity Component
+
+    File Path: src/components/ui/VariableProximity.jsx
+
+    Code:
+
+    import { forwardRef, useMemo, useRef, useEffect } from 'react';
+    import '../../styles/VariableProximity.css';
+
+    function useAnimationFrame(callback) {
+      useEffect(() => {
+        let frameId;
+        const loop = () => {
+          callback();
+          frameId = requestAnimationFrame(loop);
+        };
+        frameId = requestAnimationFrame(loop);
+        return () => cancelAnimationFrame(frameId);
+      }, [callback]);
+    }
+
+    function useMousePositionRef(containerRef) {
+      const positionRef = useRef({ x: -9999, y: -9999 });
+      useEffect(() => {
+        const updatePosition = (x, y) => {
+          if (containerRef?.current) {
+            const rect = containerRef.current.getBoundingClientRect();
+            positionRef.current = { x: x - rect.left, y: y - rect.top };
+          }
+        };
+        const handleMouseMove = ev => updatePosition(ev.clientX, ev.clientY);
+        window.addEventListener('mousemove', handleMouseMove);
+        return () => window.removeEventListener('mousemove', handleMouseMove);
+      }, [containerRef]);
+      return positionRef;
+    }
+
+    const VariableProximity = forwardRef(({ label, fromFontVariationSettings, toFontVariationSettings, containerRef, radius = 120, falloff = 'linear', className = '' }, ref) => {
+      const letterRefs = useRef([]);
+      const mousePositionRef = useMousePositionRef(containerRef);
+
+      const parsedSettings = useMemo(() => {
+        const parse = s => new Map(s.split(',').map(p => { const [k, v] = p.trim().split(' '); return [k.replace(/['"]/g, ''), parseFloat(v)]; }));
+        const from = parse(fromFontVariationSettings);
+        const to = parse(toFontVariationSettings);
+        return Array.from(from.keys()).map(axis => ({ axis, from: from.get(axis), to: to.get(axis) ?? from.get(axis) }));
+      }, [fromFontVariationSettings, toFontVariationSettings]);
+
+      useAnimationFrame(() => {
+        if (!containerRef?.current) return;
+        letterRefs.current.forEach((letterRef) => {
+          if (!letterRef) return;
+          const rect = letterRef.getBoundingClientRect();
+          const letterCenterX = rect.left + rect.width / 2 - containerRef.current.getBoundingClientRect().left;
+          const letterCenterY = rect.top + rect.height / 2 - containerRef.current.getBoundingClientRect().top;
+          const distance = Math.sqrt((mousePositionRef.current.x - letterCenterX) ** 2 + (mousePositionRef.current.y - letterCenterY) ** 2);
+          const norm = Math.max(0, 1 - distance / radius);
+          let falloffValue;
+          switch (falloff) {
+            case 'exponential': falloffValue = norm * norm; break;
+            default: falloffValue = norm;
+          }
+          const newSettings = parsedSettings.map(({ axis, from, to }) => `'${axis}' ${from + (to - from) * falloffValue}`).join(', ');
+          letterRef.style.fontVariationSettings = newSettings;
+        });
+      });
+
+      return (
+        <span ref={ref} className={`${className} variable-proximity`}>
+          {label.split('').map((letter, i) => (
+            <span key={i} ref={el => letterRefs.current[i] = el} style={{ display: 'inline-block' }}>
+              {letter === ' ' ? '\u00A0' : letter}
+            </span>
+          ))}
+        </span>
+      );
+    });
+    VariableProximity.displayName = 'VariableProximity';
+    export default VariableProximity;
+
+    CSS File Path: src/styles/VariableProximity.css
+
+    CSS Code:
+
+    @import url('[https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&display=swap](https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&display=swap)');
+    .variable-proximity {
+      font-family: 'Roboto Flex', sans-serif;
+    }
+
+5. Mock Data and API Service
+5.1 Mock Data (src/mocks/reports.js)
+
+export const reports = {
+  OCEAN_DEBRIS: [
+    { id: 1, lat: 13.0827, lng: 80.2707, intensity: 1.0, type: 'OCEAN_DEBRIS', description: "Large cluster of fishing nets at Marina Beach." },
+    { id: 2, lat: 12.8406, lng: 80.2532, intensity: 1.0, type: 'OCEAN_DEBRIS', description: "Plastic bottles covering Kovalam beach." },
+    { id: 3, lat: 12.9156, lng: 80.2309, intensity: 1.0, type: 'OCEAN_DEBRIS', description: "Construction debris near Elliot's Beach." },
+    { id: 4, lat: 13.1143, lng: 80.3200, intensity: 1.0, type: 'OCEAN_DEBRIS', description: "Tire dump found near Ennore port." }
+  ],
+  TSUNAMI_WARNING: [
+    { id: 101, lat: 12.9150, lng: 80.2315, intensity: 1.0, type: 'TSUNAMI_WARNING', description: "Water receding rapidly at Elliot's Beach." },
+    { id: 102, lat: 13.0581, lng: 80.2831, intensity: 1.0, type: 'TSUNAMI_WARNING', description: "Unusual wave patterns observed from the lighthouse." },
+    { id: 103, lat: 12.5852, lng: 80.1983, intensity: 1.0, type: 'TSUNAMI_WARNING', description: "Sudden, unexplained low tide at Mahabalipuram." }
+  ]
+};
+
+5.2 API Client (src/services/apiClient.js)
+
+import axios from 'axios';
+import { reports } from '../mocks/reports';
+
+const apiClient = axios.create({
+  baseURL: '/api',
+});
+
+// Mock API Interceptor
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const url = new URL(error.config.url, 'http://localhost');
+    const type = url.searchParams.get('type');
+
+    if (url.pathname === '/v1/reports/heatmap' && type) {
+      const data = reports[type] || [];
+      console.log(`[Mock API] Faking call for heatmap type: ${type}, found ${data.length} points.`);
+      return Promise.resolve({ 
+        data: { data_points: data }, 
+        status: 200 
+      });
+    }
+
+    if (error.config.url === '/v1/reports' && error.config.method === 'post') {
+        console.log('[Mock API] Faking report submission:', error.config.data);
+        return Promise.resolve({ data: { message: 'Report submitted successfully (mocked)' }, status: 201 });
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+export default apiClient;
+
+6. Page Definitions and Logic
+6.1 App Shell (src/App.jsx)
+
+    Navigation: Implement the <CardNav> component. The logo should be a placeholder (e.g., /vite.svg). The logoAlt text must be "The Chola Citadel Logo". Configure the navItems prop with the following data:
+
+    const navItems = [
+      {
+        label: "Report & View",
+        bgColor: "#001219", // darkBg
+        textColor: "#ffd60a", // royalGold
+        links: [
+          { label: "New Report", href: "/report", ariaLabel: "Create new hazard report" },
+          { label: "Crisis Map", href: "/map", ariaLabel: "View existing hazard reports" }
+        ]
+      },
+      {
+        label: "Resources",
+        bgColor: "#005f73", // oceanBlue
+        textColor: "#ffffff",
+        links: [
+          { label: "How to Use", href: "/tutorial", ariaLabel: "Learn how to use the app" },
+        ]
+      }
+    ];
+
+    Routing: Use react-router-dom to render the page components for /, /map, /report, and /tutorial.
+
+6.2 HomePage (src/pages/HomePage.jsx)
+
+    Background: Use the <Silk> component as a full-screen, fixed background that stays behind the content. Use color="#005f73".
+
+    Hero: Use <SplitText> for the main headline: "The Chola Citadel". The className must be "text-6xl md:text-8xl lg:text-9xl font-bold text-royalGold text-center".
+
+    Sub-heading: Use <VariableProximity> for the sub-heading: "Ocean Hazard & Crisis Reporting Platform".
+
+6.3 MapPage (src/pages/MapPage.jsx)
+
+    Must have a UI toggle (e.g., radio buttons) to switch between "Pollution Hotspots" and "Live Crisis Events".
+
+    When the toggle changes, use the apiClient to fetch data for the selected layer and display the raw JSON data in a <pre> tag to confirm it is working.
+
+6.4 ReportPage (src/pages/ReportPage.jsx)
+
+    A simple form with fields for "Description" and a file input for "Upload Image/Video".
+
+    On submit, call apiClient.post('/v1/reports', formData) and show a success message.
+
+6.5 TutorialPage (src/pages/TutorialPage.jsx)
+
+Create a new page with this content. It should be styled with Tailwind CSS to be clean and readable.
+
+const TutorialPage = () => {
+  return (
+    <div className="pt-24 p-8 max-w-4xl mx-auto text-gray-300">
+      <h1 className="text-4xl md:text-5xl font-bold text-royalGold mb-6">How to Use The Chola Citadel</h1>
+      
+      <div className="space-y-8">
+        <div className="p-6 bg-oceanBlue/20 rounded-lg border border-oceanBlue">
+          <h2 className="text-2xl font-bold text-white mb-3">Step 1: Reporting an Incident</h2>
+          <p className="mb-2">When you encounter an ocean hazard or a natural crisis, you can report it instantly.</p>
+          <ol className="list-decimal list-inside space-y-2">
+            <li>Navigate to the <strong className="text-royalGold">'New Report'</strong> page.</li>
+            <li>Fill in a brief description of the event.</li>
+            <li>Attach a photo or video as evidence. The app will automatically use your phone's location.</li>
+            <li>Click 'Submit Report'. Your report will be sent for verification.</li>
+          </ol>
+        </div>
+
+        <div className="p-6 bg-deepTeal/20 rounded-lg border border-deepTeal">
+          <h2 className="text-2xl font-bold text-white mb-3">Step 2: Viewing the Crisis Map</h2>
+          <p className="mb-2">The map provides a live, visual representation of all verified reports.</p>
+          <ol className="list-decimal list-inside space-y-2">
+            <li>Go to the <strong className="text-royalGold">'Crisis Map'</strong> page.</li>
+            <li>Use the layer toggle to switch between different views:</li>
+            <li className="ml-4"><strong className="text-white">'Pollution Hotspots'</strong> shows long-term data on ocean debris and trash accumulation.</li>
+            <li className="ml-4"><strong className="text-white">'Live Crisis Events'</strong> shows real-time reports of urgent natural events like tsunami warnings.</li>
+            <li>The map will update to show a heatmap of the selected data.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  );
+};
+export default TutorialPage;
+
+7. Configuration & Final Setup
+7.1 tailwind.config.js
+
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  theme: {
+    extend: {
+      colors: {
+        oceanBlue: '#005f73',
+        deepTeal: '#0a9396',
+        royalGold: '#ffd60a',
+        darkBg: '#001219',
+      },
+      fontFamily: {
+        main: ['"Segoe UI"', 'sans-serif'],
+        variable: ['"Roboto Flex"', 'sans-serif'],
+      },
+    },
+  },
+  plugins: [],
+}
+
+7.2 README.md
+
+Generate a README.md with simple installation instructions:
+
+# The Chola Citadel - Frontend MVP
+
+This is a React + Vite frontend for The Chola Citadel platform. All data is currently mocked.
+
+## Setup and Installation
+
+1.  **Install dependencies:**
+    ```bash
+    yarn install
+    ```
+
+2.  **Start the development server:**
+    ```bash
+    yarn dev
+    ```
+
