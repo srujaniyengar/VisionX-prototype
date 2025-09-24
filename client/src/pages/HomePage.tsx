@@ -1,5 +1,4 @@
 import React, { useRef, useState, memo, useCallback } from 'react';
-import Silk from '../components/background/Silk';
 import SplitText from '../components/ui/SplitText';
 import VariableProximity from '../components/ui/VariableProximity';
 import OnboardingModal from '../components/OnboardingModal';
@@ -18,7 +17,6 @@ const HomePage = memo(() => {
 
   return (
     <div ref={containerRef} className="relative min-h-screen overflow-hidden bg-dark-bg">
-      <Silk color="#005f73" speed={3} scale={1.5} />
       
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-8 text-center">
         <div className="max-w-6xl mx-auto">
