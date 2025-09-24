@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   MapContainer,
   TileLayer,
   Marker,
   Popup,
+  Circle,
   useMap,
   MapContainerProps,
   TileLayerProps,
@@ -16,12 +18,21 @@ import SplitText from "../components/ui/SplitText";
 
 // Fix default marker icon
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
-import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
+// Utility to create colored icons
+const createColoredIcon = (color: string) =>
+  L.icon({
+    iconUrl: `https://chart.googleapis.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|${color}`, // Google Chart pin
+    iconRetinaUrl: `https://chart.googleapis.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|${color}`,
+    shadowUrl: markerShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [0, -30],
+  });
+
 const DefaultIcon = L.icon({
-  iconUrl: markerIcon,
-  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon2x,
   shadowUrl: markerShadow,
   iconSize: [25, 41],
   iconAnchor: [12, 41],
@@ -36,8 +47,8 @@ const HeatmapLayer = ({ points }: { points: [number, number, number][] }) => {
     if (!map || points.length === 0) return;
 
     const layer = (L as any).heatLayer(points, {
-      radius: 25,
-      blur: 15,
+      radius: 65, // Heatmap blur radius
+      blur: 25,
       maxZoom: 17,
     }).addTo(map);
 
@@ -50,24 +61,28 @@ const HeatmapLayer = ({ points }: { points: [number, number, number][] }) => {
 };
 
 const MapPage = () => {
+  const { t } = useTranslation();
   const [selectedType, setSelectedType] = useState<
     "OCEAN_DEBRIS" | "TSUNAMI_WARNING"
   >("OCEAN_DEBRIS");
 
-  // Dummy points for testing
+  // Dummy heatmap points
   const dummyHeatmapPoints: [number, number, number][] = [
     [20.5937, 78.9629, 1], // India
     [37.7749, -122.4194, 1], // San Francisco
     [51.5074, -0.1278, 1], // London
   ];
 
-  const dummyMarkers = [
+  // Hazard Markers
+  const hazardMarkers = [
     {
       id: 1,
       lat: 20.5937,
       lng: 78.9629,
       type: "TSUNAMI_WARNING",
       description: "Dummy warning in India",
+      color: "red",
+      radius: 1000,
     },
     {
       id: 2,
@@ -75,13 +90,42 @@ const MapPage = () => {
       lng: -122.4194,
       type: "TSUNAMI_WARNING",
       description: "Dummy warning in San Francisco",
+      color: "orange",
+      radius: 1200,
+    },
+    {
+      id: 3,
+      lat: 13.0827, // Chennai
+      lng: 80.2707,
+      type: "FLOOD_ALERT",
+      description: "Heavy rainfall causing flood risks in Chennai",
+      color: "blue",
+      radius: 1500,
+    },
+    {
+      id: 4,
+      lat: 11.748, // Cuddalore
+      lng: 79.768,
+      type: "CYCLONE_WARNING",
+      description: "Cyclone alert in Cuddalore region",
+      color: "green",
+      radius: 2000,
+    },
+    {
+      id: 5,
+      lat: 8.0883, // Kanyakumari
+      lng: 77.5385,
+      type: "TSUNAMI_WARNING",
+      description: "High tsunami risk in Kanyakumari",
+      color: "purple",
+      radius: 2500,
     },
   ];
 
-  const mapCenter: LatLngExpression = [20, 80];
+  const mapCenter: LatLngExpression = [12.5, 80]; // Centered on South India
   const mapProps: MapContainerProps = {
     center: mapCenter,
-    zoom: 3,
+    zoom: 6,
     className: "h-[500px] w-full",
   };
 
@@ -101,7 +145,9 @@ const MapPage = () => {
         tag="h1"
         textAlign="center"
       />
-
+      <p className="text-center text-muted-foreground mb-8 max-w-3xl mx-auto">
+        {t("homepage_about")}
+      </p>
       {/* Selection Buttons */}
       <div className="mb-8 flex flex-col sm:flex-row gap-4 justify-center items-center">
         <label className="text-foreground font-medium">
@@ -141,16 +187,32 @@ const MapPage = () => {
           )}
 
           {selectedType === "TSUNAMI_WARNING" &&
-            dummyMarkers.map((point) => (
-              <Marker key={point.id} position={[point.lat, point.lng]}>
-                <Popup>
-                  <strong>{point.type.replace("_", " ")}</strong>
-                  <br />
-                  {point.description}
-                  <br />
-                  Lat: {point.lat.toFixed(4)}, Lng: {point.lng.toFixed(4)}
-                </Popup>
-              </Marker>
+            hazardMarkers.map((point) => (
+              <>
+                <Marker
+                  key={point.id}
+                  position={[point.lat, point.lng]}
+                  icon={createColoredIcon(point.color)}
+                >
+                  <Popup>
+                    <strong>{point.type.replace("_", " ")}</strong>
+                    <br />
+                    {point.description}
+                    <br />
+                    Lat: {point.lat.toFixed(4)}, Lng: {point.lng.toFixed(4)}
+                  </Popup>
+                </Marker>
+                {/* Visible Impact Zone */}
+                <Circle
+                  center={[point.lat, point.lng]}
+                  radius={point.radius} // meters
+                  pathOptions={{
+                    color: point.color,
+                    fillColor: point.color,
+                    fillOpacity: 0.25,
+                  }}
+                />
+              </>
             ))}
         </MapContainer>
       </div>

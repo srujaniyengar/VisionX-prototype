@@ -1,117 +1,123 @@
+import { useTranslation } from "react-i18next";
 import SplitText from '../components/ui/SplitText';
 
 const TutorialPage = () => {
+  const { t } = useTranslation();
+
   return (
     <div className="pt-24 p-8 max-w-4xl mx-auto text-muted-foreground bg-dark-bg min-h-screen">
       <SplitText
-        text="How to Use The Chola Citadel"
+        text={t("how_to_use")}
         className="text-4xl md:text-5xl font-bold text-royal-gold mb-6"
         delay={80}
         duration={0.6}
         tag="h1"
         textAlign="center"
       />
-      
-      <div className="space-y-8">
-        <div className="p-6 bg-ocean-blue/20 rounded-lg border border-ocean-blue">
-          <h2 className="text-2xl font-bold text-foreground mb-3">Step 1: Reporting an Incident</h2>
-          <p className="mb-2">When you encounter an ocean hazard or a natural crisis, you can report it instantly.</p>
-          <ol className="list-decimal list-inside space-y-2">
-            <li>Navigate to the <strong className="text-royal-gold">'New Report'</strong> page.</li>
-            <li>Fill in a brief description of the event.</li>
-            <li>Attach a photo or video as evidence. The app will automatically use your phone's location.</li>
-            <li>Click 'Submit Report'. Your report will be sent for verification.</li>
-          </ol>
-        </div>
+      <p className="text-center text-muted-foreground mb-8 max-w-3xl mx-auto">
+        {t("homepage_about")}
+      </p>
 
-        <div className="p-6 bg-deep-teal/20 rounded-lg border border-deep-teal">
-          <h2 className="text-2xl font-bold text-foreground mb-3">Step 2: Viewing the Crisis Map</h2>
-          <p className="mb-2">The map provides a live, visual representation of all verified reports.</p>
-          <ol className="list-decimal list-inside space-y-2">
-            <li>Go to the <strong className="text-royal-gold">'Crisis Map'</strong> page.</li>
-            <li>Use the layer toggle to switch between different views:</li>
-            <li className="ml-4"><strong className="text-foreground">'Pollution Hotspots'</strong> shows long-term data on ocean debris and trash accumulation.</li>
-            <li className="ml-4"><strong className="text-foreground">'Live Crisis Events'</strong> displays active emergencies like tsunamis, oil spills, or extreme weather.</li>
-            <li>Click on any marker to see detailed information about that specific incident.</li>
-          </ol>
-        </div>
+      {/* Step 1 */}
+      <div className="p-6 bg-ocean-blue/20 rounded-lg border border-ocean-blue mb-8">
+        <h2 className="text-2xl font-bold text-foreground mb-3">{t("step1")}</h2>
+        <p className="mb-2">{t("step1_desc")}</p>
+        <ol className="list-decimal list-inside space-y-2">
+          <li>{t("step1_list1")}</li>
+          <li>{t("step1_list2")}</li>
+          <li>{t("step1_list3")}</li>
+          <li>{t("step1_list4")}</li>
+        </ol>
+      </div>
 
-        <div className="p-6 bg-primary/20 rounded-lg border border-primary">
-          <h2 className="text-2xl font-bold text-foreground mb-3">Step 3: Understanding Report Status</h2>
-          <p className="mb-4">All reports go through a verification process to ensure accuracy:</p>
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <span className="w-4 h-4 bg-yellow-500 rounded-full"></span>
-              <span><strong className="text-foreground">Pending:</strong> Your report is under review</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="w-4 h-4 bg-green-500 rounded-full"></span>
-              <span><strong className="text-foreground">Verified:</strong> Report confirmed and added to public map</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="w-4 h-4 bg-red-500 rounded-full"></span>
-              <span><strong className="text-foreground">Urgent:</strong> Emergency response teams have been notified</span>
-            </div>
+      {/* Step 2 */}
+      <div className="p-6 bg-deep-teal/20 rounded-lg border border-deep-teal mb-8">
+        <h2 className="text-2xl font-bold text-foreground mb-3">{t("step2")}</h2>
+        <p className="mb-2">{t("step2_desc")}</p>
+        <ol className="list-decimal list-inside space-y-2">
+          <li>{t("step2_list1")}</li>
+          <li>{t("step2_list2")}</li>
+          <li className="ml-4">{t("step2_list3")}</li>
+          <li className="ml-4">{t("step2_list4")}</li>
+          <li>{t("step2_list5")}</li>
+        </ol>
+      </div>
+
+      {/* Step 3 */}
+      <div className="p-6 bg-primary/20 rounded-lg border border-primary mb-8">
+        <h2 className="text-2xl font-bold text-foreground mb-3">{t("step3")}</h2>
+        <p className="mb-4">{t("step3_desc")}</p>
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <span className="w-4 h-4 bg-yellow-500 rounded-full"></span>
+            <span>{t("pending")}</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="w-4 h-4 bg-green-500 rounded-full"></span>
+            <span>{t("verified")}</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="w-4 h-4 bg-red-500 rounded-full"></span>
+            <span>{t("urgent")}</span>
           </div>
         </div>
+      </div>
 
-        <div className="p-6 bg-muted/20 rounded-lg border border-border">
-          <h2 className="text-2xl font-bold text-foreground mb-3">Safety Guidelines</h2>
-          <div className="space-y-3">
-            <p><strong className="text-royal-gold">⚠️ Personal Safety First:</strong> Never put yourself in danger to document an incident.</p>
-            <p><strong className="text-royal-gold">📞 Emergency Situations:</strong> For life-threatening emergencies, call 108 immediately before using the app.</p>
-            <p><strong className="text-royal-gold">🔒 Location Privacy:</strong> Your exact location is only shared with authorized emergency responders.</p>
-            <p><strong className="text-royal-gold">📸 Evidence Guidelines:</strong> Take clear photos/videos but maintain a safe distance from hazardous areas.</p>
+      {/* Safety Guidelines */}
+      <div className="p-6 bg-muted/20 rounded-lg border border-border mb-8">
+        <h2 className="text-2xl font-bold text-foreground mb-3">{t("safety_guidelines")}</h2>
+        <div className="space-y-3">
+          <p>{t("personal_safety")}</p>
+          <p>{t("emergency_situations")}</p>
+          <p>{t("location_privacy")}</p>
+          <p>{t("evidence_guidelines")}</p>
+        </div>
+      </div>
+
+      {/* Types of Incidents */}
+      <div className="p-6 bg-destructive/20 rounded-lg border border-destructive mb-8">
+        <h2 className="text-2xl font-bold text-foreground mb-3">{t("incidents_to_report")}</h2>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <h3 className="font-bold text-foreground mb-2">{t("marine_hazards")}</h3>
+            <ul className="list-disc list-inside space-y-1 text-sm">
+              <li>{t("marine_hazards1")}</li>
+              <li>{t("marine_hazards2")}</li>
+              <li>{t("marine_hazards3")}</li>
+              <li>{t("marine_hazards4")}</li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-bold text-foreground mb-2">{t("natural_disasters")}</h3>
+            <ul className="list-disc list-inside space-y-1 text-sm">
+              <li>{t("natural_disasters1")}</li>
+              <li>{t("natural_disasters2")}</li>
+              <li>{t("natural_disasters3")}</li>
+              <li>{t("natural_disasters4")}</li>
+            </ul>
           </div>
         </div>
+      </div>
 
-        <div className="p-6 bg-destructive/20 rounded-lg border border-destructive">
-          <h2 className="text-2xl font-bold text-foreground mb-3">Types of Incidents to Report</h2>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <h3 className="font-bold text-foreground mb-2">🌊 Marine Hazards</h3>
-              <ul className="list-disc list-inside space-y-1 text-sm">
-                <li>Oil spills or chemical pollution</li>
-                <li>Large debris accumulations</li>
-                <li>Dead marine life</li>
-                <li>Unusual water discoloration</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-bold text-foreground mb-2">🚨 Natural Disasters</h3>
-              <ul className="list-disc list-inside space-y-1 text-sm">
-                <li>Tsunami warning signs</li>
-                <li>Severe coastal erosion</li>
-                <li>Extreme weather patterns</li>
-                <li>Sudden changes in sea level</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div className="text-center p-8 bg-card/50 rounded-lg border border-card-border">
-          <h2 className="text-2xl font-bold text-royal-gold mb-4">Ready to Make a Difference?</h2>
-          <p className="text-foreground mb-6 text-lg">
-            Join thousands of coastal guardians protecting our oceans, one report at a time.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="/report"
-              className="bg-primary text-primary-foreground px-8 py-3 rounded-lg font-semibold 
-                       hover-elevate transition-all duration-300"
-              data-testid="button-start-reporting"
-            >
-              Start Reporting Now
-            </a>
-            <a
-              href="/map"
-              className="bg-ocean-blue text-white px-8 py-3 rounded-lg font-semibold 
-                       hover-elevate transition-all duration-300"
-              data-testid="button-explore-map"
-            >
-              Explore the Map
-            </a>
-          </div>
+      {/* Call to Action */}
+      <div className="text-center p-8 bg-card/50 rounded-lg border border-card-border">
+        <h2 className="text-2xl font-bold text-royal-gold mb-4">{t("ready_to_make_difference")}</h2>
+        <p className="text-foreground mb-6 text-lg">{t("join_guardians")}</p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <a
+            href="/report"
+            className="bg-primary text-primary-foreground px-8 py-3 rounded-lg font-semibold hover-elevate transition-all duration-300"
+            data-testid="button-start-reporting"
+          >
+            {t("start_reporting_now")}
+          </a>
+          <a
+            href="/map"
+            className="bg-ocean-blue text-white px-8 py-3 rounded-lg font-semibold hover-elevate transition-all duration-300"
+            data-testid="button-explore-map"
+          >
+            {t("explore_map")}
+          </a>
         </div>
       </div>
     </div>

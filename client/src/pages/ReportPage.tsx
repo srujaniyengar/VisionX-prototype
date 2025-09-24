@@ -1,8 +1,10 @@
+import { useTranslation } from "react-i18next";
 import { useState } from 'react';
 import apiClient from '../services/apiClient';
 import SplitText from '../components/ui/SplitText';
 
 const ReportPage = () => {
+  const { t } = useTranslation();
   const [description, setDescription] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -56,7 +58,9 @@ const ReportPage = () => {
         tag="h1"
         textAlign="center"
       />
-      
+      <p className="text-center text-muted-foreground mb-8 max-w-2xl mx-auto">
+        {t("homepage_about")}
+      </p>
       <div className="bg-card border border-card-border rounded-lg p-8 shadow-lg">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>

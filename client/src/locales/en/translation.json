@@ -1,0 +1,63 @@
+{
+  "homepage_title": "The Chola Citadel",
+  "homepage_subtitle": "Ocean Hazard & Crisis Reporting Platform",
+  "homepage_about": "Report ocean hazards, track environmental crises, and collaborate with coastal communities to protect our marine ecosystems. Join the mission to safeguard our oceans through real-time monitoring and community-driven reporting.",
+  "homepage_report": "Start Reporting",
+  "homepage_map": "View Crisis Map",
+  "language": "Language",
+
+  "report_hazard": "Report Ocean Hazard",
+  "description_of_incident": "Description of Incident",
+  "upload_evidence": "Upload Evidence (Photo/Video)",
+  "accepted_formats": "Accepted formats: JPG, PNG, MP4, MOV (max 10MB)",
+  "location_detection": "📍 Location Detection",
+  "location_detection_help": "Your device location will be automatically detected when you submit this report. This helps emergency responders locate the incident quickly.",
+
+  "crisis_map": "Crisis Map",
+
+  "how_to_use": "How to Use The Chola Citadel",
+  "step1": "Step 1: Reporting an Incident",
+  "step1_desc": "When you encounter an ocean hazard or a natural crisis, you can report it instantly.",
+  "step1_list1": "Navigate to the 'New Report' page.",
+  "step1_list2": "Fill in a brief description of the event.",
+  "step1_list3": "Attach a photo or video as evidence. The app will automatically use your phone's location.",
+  "step1_list4": "Click 'Submit Report'. Your report will be sent for verification.",
+
+  "step2": "Step 2: Viewing the Crisis Map",
+  "step2_desc": "The map provides a live, visual representation of all verified reports.",
+  "step2_list1": "Go to the 'Crisis Map' page.",
+  "step2_list2": "Use the layer toggle to switch between different views:",
+  "step2_list3": "'Pollution Hotspots' shows long-term data on ocean debris and trash accumulation.",
+  "step2_list4": "'Live Crisis Events' displays active emergencies like tsunamis, oil spills, or extreme weather.",
+  "step2_list5": "Click on any marker to see detailed information about that specific incident.",
+
+  "step3": "Step 3: Understanding Report Status",
+  "step3_desc": "All reports go through a verification process to ensure accuracy:",
+  "pending": "Pending: Your report is under review",
+  "verified": "Verified: Report confirmed and added to public map",
+  "urgent": "Urgent: Emergency response teams have been notified",
+
+  "safety_guidelines": "Safety Guidelines",
+  "personal_safety": "⚠️ Personal Safety First: Never put yourself in danger to document an incident.",
+  "emergency_situations": "📞 Emergency Situations: For life-threatening emergencies, call 108 immediately before using the app.",
+  "location_privacy": "🔒 Location Privacy: Your exact location is only shared with authorized emergency responders.",
+  "evidence_guidelines": "📸 Evidence Guidelines: Take clear photos/videos but maintain a safe distance from hazardous areas.",
+
+  "incidents_to_report": "Types of Incidents to Report",
+  "marine_hazards": "🌊 Marine Hazards",
+  "marine_hazards1": "Oil spills or chemical pollution",
+  "marine_hazards2": "Large debris accumulations",
+  "marine_hazards3": "Dead marine life",
+  "marine_hazards4": "Unusual water discoloration",
+
+  "natural_disasters": "🚨 Natural Disasters",
+  "natural_disasters1": "Tsunami warning signs",
+  "natural_disasters2": "Severe coastal erosion",
+  "natural_disasters3": "Extreme weather patterns",
+  "natural_disasters4": "Sudden changes in sea level",
+
+  "ready_to_make_difference": "Ready to Make a Difference?",
+  "join_guardians": "Join thousands of coastal guardians protecting our oceans, one report at a time.",
+  "start_reporting_now": "Start Reporting Now",
+  "explore_map": "Explore the Map"
+}
