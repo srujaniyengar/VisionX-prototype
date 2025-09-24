@@ -1,14 +1,28 @@
-import React, { useRef, useState, memo, useCallback } from 'react';
-import Silk from '../components/background/Silk';
+import React, { useRef, useState, memo, useCallback, useEffect } from 'react';
 import SplitText from '../components/ui/SplitText';
 import VariableProximity from '../components/ui/VariableProximity';
 import OnboardingModal from '../components/OnboardingModal';
 
 const HomePage = memo(() => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [showOnboarding, setShowOnboarding] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // Show onboarding unless user clicked "Don't show again"
+  useEffect(() => {
+    const dontShow = localStorage.getItem("dontShowTutorial");
+    if (!dontShow) {
+      setShowOnboarding(true);
+    }
+  }, []);
 
   const handleOnboardingComplete = useCallback(() => {
+    // Close for this visit only
+    setShowOnboarding(false);
+  }, []);
+
+  const handleDontShowAgain = useCallback(() => {
+    // Save preference and never show again
+    localStorage.setItem("dontShowTutorial", "true");
     setShowOnboarding(false);
   }, []);
 
@@ -18,8 +32,6 @@ const HomePage = memo(() => {
 
   return (
     <div ref={containerRef} className="relative min-h-screen overflow-hidden bg-dark-bg">
-      <Silk color="#005f73" speed={3} scale={1.5} />
-      
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-8 text-center">
         <div className="max-w-6xl mx-auto">
           <SplitText
@@ -37,7 +49,7 @@ const HomePage = memo(() => {
             tag="h1"
             onLetterAnimationComplete={handleAnimationComplete}
           />
-          
+
           <div className="mb-12">
             <VariableProximity
               label="Ocean Hazard & Crisis Reporting Platform"
@@ -92,7 +104,7 @@ const HomePage = memo(() => {
         </div>
       </div>
 
-      {/* Floating particles effect - reduced for performance */}
+      {/* Floating particles effect */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {[...Array(8)].map((_, i) => (
           <div
@@ -107,14 +119,14 @@ const HomePage = memo(() => {
           />
         ))}
       </div>
-      
+
       {showOnboarding && (
-        <OnboardingModal onComplete={handleOnboardingComplete} />
-      )}
+  <OnboardingModal onComplete={handleOnboardingComplete} />
+)}
+
     </div>
   );
 });
 
 HomePage.displayName = 'HomePage';
-
 export default HomePage;
