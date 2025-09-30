@@ -168,8 +168,7 @@ Switch between English, Hindi, and Tamil with a single click. All major UI eleme
 
 ## Contributing
 
-Pull requests are welcome! Whether you're a developer, accessibility advocate, or simply passionate about ocean health, contributions and feedback are encouraged. Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
-
+Pull requests are welcome! Whether you're a developer, accessibility advocate, or simply passionate about ocean health, contributions and feedback are encouraged.  
 ---
 
 ## Sustainability & Governance
